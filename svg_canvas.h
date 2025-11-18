@@ -50,6 +50,10 @@ protected:
 
     void UpdateVirtualSize();
 
+public:
+    SvgItem* GetSelectedSvg() { return m_selectedItem; }
+
+
 private:
     std::vector<std::shared_ptr<SvgItem>> m_items;
 
@@ -67,4 +71,8 @@ private:
 
     // Visual
     int m_labelHeight;
+
+private:
+    SvgItem* m_selectedItem = nullptr;   // currently selected SVG
+
 };

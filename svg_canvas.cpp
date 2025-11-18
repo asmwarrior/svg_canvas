@@ -102,6 +102,15 @@ void SvgCanvas::OnPaint(wxPaintEvent& WXUNUSED(evt))
         {
             dc.DrawBitmap(bmp, deviceTopLeft.x, deviceTopLeft.y, true);
 
+            // Draw selection rectangle
+            if (item.get() == m_selectedItem)
+            {
+                wxPen selPen(*wxBLUE, 2);
+                dc.SetPen(selPen);
+                dc.SetBrush(*wxTRANSPARENT_BRUSH);
+                dc.DrawRectangle(deviceTopLeft.x, deviceTopLeft.y, w, h);
+            }
+
             // Draw label underneath
             if (!item->label.IsEmpty())
             {
@@ -188,18 +197,29 @@ void SvgCanvas::OnLeftDown(wxMouseEvent& evt)
     wxPoint logical = ScreenToLogical(evt.GetPosition());
     wxPoint local;
     auto hit = HitTest(logical, &local);
+
     if (hit)
     {
-        m_dragItem = std::shared_ptr<SvgItem>(hit, [](SvgItem*){ /* non-owning wrapper: do nothing */ });
-        // store offset from item top-left to mouse pos
+        // Set the clicked SVG as selected
+        m_selectedItem = hit;
+
+        // Start dragging
+        m_dragItem = std::shared_ptr<SvgItem>(hit, [](SvgItem*){ /* non-owning */ });
         m_dragOffset = wxPoint(local.x, local.y);
+
         CaptureMouse();
+
+        Refresh(false); // optional: redraw selection rectangle
     }
     else
     {
+        // Clicked empty space → clear selection
+        m_selectedItem = nullptr;
         evt.Skip();
+        Refresh(false);
     }
 }
+
 
 void SvgCanvas::OnLeftUp(wxMouseEvent& evt)
 {
@@ -333,3 +353,4 @@ void SvgCanvas::UpdateVirtualSize()
 
     SetVirtualSize(maxX, maxY);
 }
+
