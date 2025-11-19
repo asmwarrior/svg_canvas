@@ -36,7 +36,7 @@ Copy those files to a sub folder named `liblunasvg`, which will be used in our `
 
 This is the application screen:
 
-![application](app_main_window.png)
+![application main window](./images/app_main_window.png)
 
 you can use the mouse to drag and drop the icons in the canvas.
 
@@ -45,3 +45,14 @@ you can use the mouse to drag and drop the icons in the canvas.
 If you want to use Code::Blocks to build this project file `svg_canvas.cbp`, you need to config the `global compiler variable` inside the Code::Blocks.
 You can see a more detailed step by step instructions here: [asmwarrior/cb_projects_for_wxWidgets: Code::Blocks projects for building wxWidgets sample code](https://github.com/asmwarrior/cb_projects_for_wxWidgets)
 
+# drag and drop the svg image on the canvas
+
+![drag drop and scale the canvas](./images/drag-drop-scale.gif)
+
+# Change the color of the svg image
+
+![change color](./images/change-color.gif)
+
+# Change the text content inside svg image
+
+![change color](./images/change-text.gif)
