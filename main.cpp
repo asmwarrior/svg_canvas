@@ -28,22 +28,29 @@ public:
 
         enum
         {
-            ID_MODIFY_SVG_COLOR = wxID_HIGHEST + 1
+            ID_MODIFY_SVG_COLOR = wxID_HIGHEST + 1,
+            ID_MODIFY_SVG_TEXT  = wxID_HIGHEST + 2
         };
 
         wxMenu* menuEdit = new wxMenu;
         menuEdit->Append(ID_MODIFY_SVG_COLOR,
                          "Modify SVG Color...",
                          "Change the fill color of the selected SVG");
+        menuEdit->Append(ID_MODIFY_SVG_TEXT,
+                         "Modify SVG Text...",
+                         "Change the text content of the selected SVG");
 
         wxMenuBar* menuBar = new wxMenuBar;
         menuBar->Append(menuEdit, "&Edit");
         SetMenuBar(menuBar);
 
         Bind(wxEVT_MENU, &MainFrame::OnChangeSvgColor, this, ID_MODIFY_SVG_COLOR);
+        Bind(wxEVT_MENU, &MainFrame::OnChangeSvgText, this, ID_MODIFY_SVG_TEXT);
+
     }
 
     void OnChangeSvgColor(wxCommandEvent&);
+    void OnChangeSvgText(wxCommandEvent&);
 
 private:
     SvgCanvas* m_canvas;
@@ -126,6 +133,85 @@ void MainFrame::OnChangeSvgColor(wxCommandEvent&)
     // Refresh canvas to show changes
     m_canvas->Refresh(false);
 }
+
+void MainFrame::OnChangeSvgText(wxCommandEvent&)
+{
+    auto hit = m_canvas->GetSelectedSvg();
+    if (!hit)
+    {
+        wxMessageBox("Please click an SVG first.");
+        return;
+    }
+
+    // Access the SVG document
+    auto doc = hit->svg.GetDocument();
+    if (!doc)
+        return;
+
+    // Find all <text> elements
+    auto elements = doc->querySelectorAll("text");
+    if (elements.empty())
+    {
+        wxMessageBox("No <text> elements found in this SVG.");
+        return;
+    }
+
+    // Prepare choices for user: show current text content for each element
+    wxArrayString choices;
+    for (size_t i = 0; i < elements.size(); ++i)
+    {
+        std::string currentText;
+        auto children = elements[i].children();
+        for (auto& child : children)
+        {
+            if (child.isTextNode())
+            {
+                currentText = child.toTextNode().data();
+                break;
+            }
+        }
+        choices.Add(wxString::Format("Element %d: %s", (int)i + 1, currentText));
+    }
+
+    // Ask user to select element
+    wxSingleChoiceDialog selectDlg(this,
+        "Select a <text> element to edit:",
+        "Choose Text Element",
+        choices);
+
+    if (selectDlg.ShowModal() != wxID_OK)
+        return;
+
+    int selIndex = selectDlg.GetSelection();
+    if (selIndex < 0 || selIndex >= (int)elements.size())
+        return;
+
+    // Ask user for new text
+    wxTextEntryDialog textDlg(this,
+        "Enter new text content:",
+        "Edit SVG Text");
+
+    if (textDlg.ShowModal() != wxID_OK)
+        return;
+
+    std::string newText = textDlg.GetValue().ToStdString();
+
+    // Update the selected <text> element
+    auto children = elements[selIndex].children();
+    for (auto& child : children)
+    {
+        if (child.isTextNode())
+        {
+            auto textNode = child.toTextNode();
+            textNode.setData(newText);
+        }
+    }
+
+    // Force re-render
+    hit->svg.MarkDirty();
+    m_canvas->Refresh();
+}
+
 
 // App
 class MyApp : public wxApp
