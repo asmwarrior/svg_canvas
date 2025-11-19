@@ -40,5 +40,8 @@ This is the application screen:
 
 you can use the mouse to drag and drop the icons in the canvas.
 
+# Note
 
+If you want to use Code::Blocks to build this project file `svg_canvas.cbp`, you need to config the `global compiler variable` inside the Code::Blocks.
+You can see a more detailed step by step instructions here: [asmwarrior/cb_projects_for_wxWidgets: Code::Blocks projects for building wxWidgets sample code](https://github.com/asmwarrior/cb_projects_for_wxWidgets)
 
